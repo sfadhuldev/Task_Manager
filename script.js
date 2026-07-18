@@ -1,16 +1,9 @@
-/* SFadhul Workspace - script.js */
 
-// ========================================
-// DOM References
-// ========================================
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => document.querySelectorAll(s);
 
 function el(id) { return document.getElementById(id); }
 
-// ========================================
-// State
-// ========================================
 const state = {
   tasks: [],
   habits: [],
@@ -74,9 +67,6 @@ const ACHIEVEMENTS = [
 const KANBAN_COLS = ['not-started', 'in-progress', 'review', 'done'];
 const VIEW_NAMES = ['dashboard', 'tasks', 'calendar', 'kanban', 'habits', 'pomodoro', 'goals', 'notes', 'focus', 'achievements', 'settings'];
 
-// ========================================
-// Utilities
-// ========================================
 function esc(str) {
   const div = document.createElement('div');
   div.textContent = str;
@@ -122,9 +112,6 @@ function debounce(fn, ms) {
   };
 }
 
-// ========================================
-// LocalStorage
-// ========================================
 function save() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
@@ -180,15 +167,13 @@ function load() {
     state.activityLog = Array.isArray(d.activityLog) ? d.activityLog : [];
     state.theme = d.theme || 'dark';
 
-    // Reset daily pomodoro counter if it's a new day
-    if (d.pomoDayTimestamp !== today()) {
+        if (d.pomoDayTimestamp !== today()) {
       state.pomo.today = 0;
     } else {
       state.pomo.today = d.pomoToday || 0;
     }
 
-    // Reset weekly pomodoro counter if it's a new week
-    var currentWeek = getWeekNumber(new Date());
+        var currentWeek = getWeekNumber(new Date());
     if ((d.pomoWeekNum || 0) !== currentWeek) {
       state.pomo.week = 0;
     } else {
@@ -200,9 +185,6 @@ function load() {
   }
 }
 
-// ========================================
-// Toast
-// ========================================
 function toast(msg, type) {
   type = type || 'info';
   const container = el('toast-container');
@@ -217,9 +199,6 @@ function toast(msg, type) {
   }, 3000);
 }
 
-// ========================================
-// Activity Log
-// ========================================
 function logActivity(text) {
   state.activityLog.unshift({ text: text, time: new Date().toISOString() });
   if (state.activityLog.length > 30) state.activityLog.length = 30;
@@ -227,9 +206,6 @@ function logActivity(text) {
   renderTimeline();
 }
 
-// ========================================
-// Navigation
-// ========================================
 function openView(name) {
   if (!el('view-' + name)) return;
 
@@ -242,11 +218,9 @@ function openView(name) {
     btn.classList.toggle('active', btn.dataset.view === name);
   });
 
-  // Close mobile sidebar
-  el('sidebar').classList.remove('open');
+    el('sidebar').classList.remove('open');
 
-  // Refresh view data
-  if (name === 'dashboard') updateDashboard();
+    if (name === 'dashboard') updateDashboard();
   if (name === 'calendar') renderCalendar();
   if (name === 'kanban') renderKanban();
   if (name === 'habits') renderHabits();
@@ -255,9 +229,6 @@ function openView(name) {
   if (name === 'achievements') renderAchievements();
 }
 
-// ========================================
-// Tasks
-// ========================================
 function addTask(title, priority, category, dueDate, recurring) {
   if (!title || !title.trim()) return;
 
@@ -407,9 +378,6 @@ function priWeight(p) {
   return { critical: 4, high: 3, medium: 2, low: 1 }[p] || 0;
 }
 
-// ========================================
-// Render Tasks
-// ========================================
 function renderTasks() {
   var filtered = getFilteredTasks();
   var sorted = getSortedTasks(filtered);
@@ -426,8 +394,7 @@ function renderTasks() {
     list.innerHTML = sorted.map(renderTaskItem).join('');
   }
 
-  // Active count for badge and footer
-  var active = state.tasks.filter(function(t) { return !t.completed; }).length;
+    var active = state.tasks.filter(function(t) { return !t.completed; }).length;
   el('nav-badge').textContent = active;
   el('nav-badge').style.display = active > 0 ? 'inline' : 'none';
   el('foot-count').textContent = active + ' task' + (active !== 1 ? 's' : '') + ' remaining';
@@ -463,9 +430,6 @@ function renderTaskItem(task) {
   '</li>';
 }
 
-// ========================================
-// Dashboard
-// ========================================
 function updateDashboard() {
   var total = state.tasks.length;
   var done = state.tasks.filter(function(t) { return t.completed; }).length;
@@ -481,8 +445,7 @@ function updateDashboard() {
   el('st-today').textContent = todayCount;
   el('st-score').textContent = score + '%';
 
-  // Completion ring
-  var r = 50;
+    var r = 50;
   var circ = 2 * Math.PI * r;
   var offset = total === 0 ? circ : circ - (done / total) * circ;
   el('ring-fg').style.strokeDasharray = circ;
@@ -490,8 +453,7 @@ function updateDashboard() {
   el('ring-pct').textContent = score + '%';
   el('ring-sub').textContent = done + ' / ' + total + ' tasks';
 
-  // Today's tasks
-  var todayTasks = state.tasks.filter(function(t) { return t.dueDate === today() && !t.completed; }).slice(0, 6);
+    var todayTasks = state.tasks.filter(function(t) { return t.dueDate === today() && !t.completed; }).slice(0, 6);
   var todayList = el('dash-today-list');
   if (todayTasks.length === 0) {
     todayList.innerHTML = '<p class="muted">No tasks due today.</p>';
@@ -504,9 +466,6 @@ function updateDashboard() {
   renderTimeline();
 }
 
-// ========================================
-// Timeline
-// ========================================
 function renderTimeline() {
   var container = el('timeline');
   if (!container) return;
@@ -523,9 +482,6 @@ function renderTimeline() {
   }).join('');
 }
 
-// ========================================
-// Streak
-// ========================================
 function checkStreak() {
   var dates = state.tasks
     .filter(function(t) { return t.completed; })
@@ -553,9 +509,6 @@ function checkStreak() {
   state.streak = streak;
 }
 
-// ========================================
-// Calendar
-// ========================================
 function renderCalendar() {
   var now = new Date();
   var y = state.calYear || now.getFullYear();
@@ -571,13 +524,11 @@ function renderCalendar() {
   var todayStr = today();
   var html = '';
 
-  // Previous month days
-  for (var i = firstDay - 1; i >= 0; i--) {
+    for (var i = firstDay - 1; i >= 0; i--) {
     html += '<div class="cal-day other">' + (daysInPrev - i) + '</div>';
   }
 
-  // Current month days
-  for (var d = 1; d <= daysInMonth; d++) {
+    for (var d = 1; d <= daysInMonth; d++) {
     var dateStr = y + '-' + String(m + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
     var tasksOnDay = state.tasks.filter(function(t) { return t.dueDate === dateStr; });
     var isToday = dateStr === todayStr;
@@ -586,8 +537,7 @@ function renderCalendar() {
     html += '<div class="cal-day' + (isToday ? ' today' : '') + '" data-date="' + dateStr + '">' + d + countBadge + '</div>';
   }
 
-  // Next month days
-  var totalCells = firstDay + daysInMonth;
+    var totalCells = firstDay + daysInMonth;
   var remaining = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
   for (var j = 1; j <= remaining; j++) {
     html += '<div class="cal-day other">' + j + '</div>';
@@ -595,8 +545,7 @@ function renderCalendar() {
 
   el('cal-body').innerHTML = html;
 
-  // Click on day to see tasks
-  el('cal-body').querySelectorAll('.cal-day[data-date]').forEach(function(dayEl) {
+    el('cal-body').querySelectorAll('.cal-day[data-date]').forEach(function(dayEl) {
     dayEl.addEventListener('click', function() {
       var dateStr = dayEl.dataset.date;
       var tasks = state.tasks.filter(function(t) { return t.dueDate === dateStr; });
@@ -607,9 +556,6 @@ function renderCalendar() {
   });
 }
 
-// ========================================
-// Kanban
-// ========================================
 function renderKanban() {
   KANBAN_COLS.forEach(function(col) {
     var list = el('kl-' + col);
@@ -636,8 +582,7 @@ function renderKanban() {
       '</div>';
     }).join('');
 
-    // Drag and drop
-    list.querySelectorAll('.kanban-card').forEach(function(card) {
+        list.querySelectorAll('.kanban-card').forEach(function(card) {
       card.addEventListener('dragstart', function(e) {
         e.dataTransfer.setData('text/plain', card.dataset.id);
         card.classList.add('dragging');
@@ -649,9 +594,6 @@ function renderKanban() {
   });
 }
 
-// ========================================
-// Habits
-// ========================================
 function renderHabits() {
   var container = el('habit-list');
 
@@ -687,8 +629,7 @@ function renderHabits() {
     '</div>';
   }).join('');
 
-  // Toggle habit day
-  container.querySelectorAll('.habit-day').forEach(function(dayEl) {
+    container.querySelectorAll('.habit-day').forEach(function(dayEl) {
     dayEl.addEventListener('click', function() {
       var habitId = dayEl.dataset.habit;
       var dateStr = dayEl.dataset.day;
@@ -707,8 +648,7 @@ function renderHabits() {
     });
   });
 
-  // Delete habit
-  container.querySelectorAll('.habit-del').forEach(function(btn) {
+    container.querySelectorAll('.habit-del').forEach(function(btn) {
     btn.addEventListener('click', function() {
       var habit = state.habits.find(function(h) { return h.id === btn.dataset.id; });
       var name = habit ? habit.name : 'this habit';
@@ -722,9 +662,6 @@ function renderHabits() {
   });
 }
 
-// ========================================
-// Pomodoro
-// ========================================
 function updatePomodoroDisplay() {
   var m = Math.floor(state.pomo.time / 60);
   var s = state.pomo.time % 60;
@@ -814,8 +751,7 @@ function updatePomodoroStats() {
 function notifyPomodoro(title, body) {
   toast(title + '! ' + body, 'ok');
 
-  // Flash page title
-  var origTitle = document.title;
+    var origTitle = document.title;
   var flashCount = 0;
   var flashInterval = setInterval(function() {
     document.title = flashCount % 2 === 0 ? '\u23F1 ' + title : origTitle;
@@ -826,17 +762,13 @@ function notifyPomodoro(title, body) {
     }
   }, 1000);
 
-  // Request browser notification if permitted
-  if ('Notification' in window && Notification.permission === 'granted') {
+    if ('Notification' in window && Notification.permission === 'granted') {
     new Notification(title, { body: body });
   } else if ('Notification' in window && Notification.permission !== 'denied') {
     Notification.requestPermission();
   }
 }
 
-// ========================================
-// Goals
-// ========================================
 function renderGoals() {
   var container = el('goal-list');
 
@@ -889,9 +821,6 @@ function renderGoals() {
   });
 }
 
-// ========================================
-// Notes
-// ========================================
 function renderNotes() {
   var container = el('notes-list');
 
@@ -924,9 +853,6 @@ function renderNotes() {
   });
 }
 
-// ========================================
-// Focus Mode
-// ========================================
 function enterFocus() {
   el('focus-enter').style.display = 'none';
   el('focus-active').style.display = 'block';
@@ -953,9 +879,6 @@ function exitFocus() {
   el('focus-active').style.display = 'none';
 }
 
-// ========================================
-// Achievements
-// ========================================
 function renderAchievements() {
   el('achieve-grid').innerHTML = ACHIEVEMENTS.map(function(a) {
     var unlocked = a.check(state);
@@ -967,9 +890,6 @@ function renderAchievements() {
   }).join('');
 }
 
-// ========================================
-// Theme
-// ========================================
 function setTheme(name) {
   state.theme = name;
   document.documentElement.setAttribute('data-theme', name);
@@ -980,9 +900,6 @@ function setTheme(name) {
   });
 }
 
-// ========================================
-// Clock
-// ========================================
 function updateClock() {
   var now = new Date();
   var timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
@@ -995,9 +912,6 @@ function updateClock() {
   if (date) date.textContent = dateStr;
 }
 
-// ========================================
-// Quotes
-// ========================================
 function nextQuote() {
   var q = QUOTES[state.quoteIdx % QUOTES.length];
   el('quote-text').textContent = q.t;
@@ -1005,9 +919,6 @@ function nextQuote() {
   state.quoteIdx++;
 }
 
-// ========================================
-// Export / Import
-// ========================================
 function exportData() {
   var data = {
     tasks: state.tasks,
@@ -1052,8 +963,7 @@ function importData(file) {
       if (typeof d.pomoLongMin === 'number') state.pomo.longMin = d.pomoLongMin;
       if (Array.isArray(d.activityLog)) state.activityLog = d.activityLog;
 
-      // Update settings inputs
-      el('set-focus').value = state.pomo.focusMin;
+            el('set-focus').value = state.pomo.focusMin;
       el('set-short').value = state.pomo.shortMin;
       el('set-long').value = state.pomo.longMin;
 
@@ -1073,9 +983,6 @@ function importData(file) {
   reader.readAsText(file);
 }
 
-// ========================================
-// Command Palette
-// ========================================
 var cmdMatches = [];
 var cmdIdx = -1;
 
@@ -1156,26 +1063,18 @@ function runCommand(val) {
   });
 }
 
-// ========================================
-// Confirm Modal
-// ========================================
 function confirmAction(msg, cb) {
   el('confirm-text').textContent = msg;
   state.confirmCb = cb;
   el('modal-confirm').classList.add('active');
 }
 
-// ========================================
-// Event Listeners
-// ========================================
 function bindEvents() {
-  // Sidebar navigation
-  $$('.nav-btn').forEach(function(btn) {
+    $$('.nav-btn').forEach(function(btn) {
     btn.addEventListener('click', function() { openView(btn.dataset.view); });
   });
 
-  // Mobile menu
-  el('menu-btn').addEventListener('click', function() {
+    el('menu-btn').addEventListener('click', function() {
     el('sidebar').classList.add('open');
   });
 
@@ -1183,16 +1082,14 @@ function bindEvents() {
     el('sidebar').classList.remove('open');
   });
 
-  // Close sidebar on outside click (mobile)
-  document.addEventListener('click', function(e) {
+    document.addEventListener('click', function(e) {
     var sidebar = el('sidebar');
     if (window.innerWidth <= 768 && sidebar.classList.contains('open') && !sidebar.contains(e.target) && e.target !== el('menu-btn')) {
       sidebar.classList.remove('open');
     }
   });
 
-  // Theme toggle
-  el('theme-toggle').addEventListener('click', function() {
+    el('theme-toggle').addEventListener('click', function() {
     setTheme(state.theme === 'dark' ? 'light' : 'dark');
   });
 
@@ -1201,47 +1098,40 @@ function bindEvents() {
     if (card) setTheme(card.dataset.theme);
   });
 
-  // Task form
-  el('task-form').addEventListener('submit', function(e) {
+    el('task-form').addEventListener('submit', function(e) {
     e.preventDefault();
     addTask(el('task-input').value, el('task-priority').value, el('task-category').value, el('task-date').value, el('task-recurring').value);
     el('task-input').value = '';
   });
 
-  // Task list clicks
-  el('task-list').addEventListener('click', function(e) {
+    el('task-list').addEventListener('click', function(e) {
     var item = e.target.closest('.task-item');
     if (!item) return;
     var id = item.dataset.id;
 
-    // Checkbox
-    if (e.target.classList.contains('task-cb')) {
+        if (e.target.classList.contains('task-cb')) {
       toggleTask(id);
       return;
     }
 
-    // Action buttons
-    var action = e.target.closest('[data-action]');
+        var action = e.target.closest('[data-action]');
     if (action) {
       if (action.dataset.action === 'edit') openEditTask(id);
       if (action.dataset.action === 'delete') deleteTask(id);
     }
   });
 
-  // Task search (debounced)
-  el('task-search').addEventListener('input', debounce(function() {
+    el('task-search').addEventListener('input', debounce(function() {
     state.search = el('task-search').value;
     renderTasks();
   }, 200));
 
-  // Task sort
-  el('task-sort').addEventListener('change', function() {
+    el('task-sort').addEventListener('change', function() {
     state.sort = el('task-sort').value;
     renderTasks();
   });
 
-  // Task filters
-  el('filter-row').addEventListener('click', function(e) {
+    el('filter-row').addEventListener('click', function(e) {
     var btn = e.target.closest('.filter-btn');
     if (!btn) return;
     $$('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
@@ -1250,11 +1140,9 @@ function bindEvents() {
     renderTasks();
   });
 
-  // Clear completed
-  el('clear-done-btn').addEventListener('click', clearCompleted);
+    el('clear-done-btn').addEventListener('click', clearCompleted);
 
-  // Clear all
-  el('clear-all-btn').addEventListener('click', function() {
+    el('clear-all-btn').addEventListener('click', function() {
     confirmAction('Delete ALL tasks?', function() {
       state.tasks = [];
       state.completedCount = 0;
@@ -1266,14 +1154,12 @@ function bindEvents() {
     });
   });
 
-  // Export / Import
-  el('export-btn').addEventListener('click', exportData);
+    el('export-btn').addEventListener('click', exportData);
   el('import-input').addEventListener('change', function(e) {
     if (e.target.files[0]) importData(e.target.files[0]);
   });
 
-  // Edit form
-  el('edit-form').addEventListener('submit', function(e) {
+    el('edit-form').addEventListener('submit', function(e) {
     e.preventDefault();
     saveEditTask({
       title: el('edit-text').value,
@@ -1295,8 +1181,7 @@ function bindEvents() {
     state.editId = null;
   });
 
-  // Confirm modal
-  el('confirm-yes').addEventListener('click', function() {
+    el('confirm-yes').addEventListener('click', function() {
     el('modal-confirm').classList.remove('active');
     if (state.confirmCb) state.confirmCb();
     state.confirmCb = null;
@@ -1312,8 +1197,7 @@ function bindEvents() {
     state.confirmCb = null;
   });
 
-  // Close modals on overlay click
-  document.addEventListener('click', function(e) {
+    document.addEventListener('click', function(e) {
     if (e.target.classList.contains('modal-overlay')) {
       e.target.classList.remove('active');
       state.editId = null;
@@ -1321,8 +1205,7 @@ function bindEvents() {
     }
   });
 
-  // Calendar
-  el('cal-prev').addEventListener('click', function() {
+    el('cal-prev').addEventListener('click', function() {
     state.calMonth--;
     if (state.calMonth < 0) { state.calMonth = 11; state.calYear--; }
     renderCalendar();
@@ -1341,8 +1224,7 @@ function bindEvents() {
     renderCalendar();
   });
 
-  // Kanban drag and drop
-  KANBAN_COLS.forEach(function(col) {
+    KANBAN_COLS.forEach(function(col) {
     var list = el('kl-' + col);
     if (!list) return;
 
@@ -1380,8 +1262,7 @@ function bindEvents() {
     });
   });
 
-  // Habits
-  el('habit-add-btn').addEventListener('click', function() {
+    el('habit-add-btn').addEventListener('click', function() {
     el('habit-form-wrap').style.display = el('habit-form-wrap').style.display === 'none' ? 'block' : 'none';
   });
 
@@ -1402,8 +1283,7 @@ function bindEvents() {
     el('habit-input').value = '';
   });
 
-  // Pomodoro
-  $$('.pomo-mode').forEach(function(btn) {
+    $$('.pomo-mode').forEach(function(btn) {
     btn.addEventListener('click', function() { setPomodoroMode(btn.dataset.mode); });
   });
 
@@ -1411,8 +1291,7 @@ function bindEvents() {
   el('pomo-pause').addEventListener('click', pausePomodoro);
   el('pomo-reset').addEventListener('click', resetPomodoro);
 
-  // Goals
-  el('goal-add-btn').addEventListener('click', function() {
+    el('goal-add-btn').addEventListener('click', function() {
     el('goal-form-wrap').style.display = el('goal-form-wrap').style.display === 'none' ? 'block' : 'none';
   });
 
@@ -1442,8 +1321,7 @@ function bindEvents() {
     el('goal-input').value = '';
   });
 
-  // Notes
-  el('note-form').addEventListener('submit', function(e) {
+    el('note-form').addEventListener('submit', function(e) {
     e.preventDefault();
     var title = el('note-title').value.trim();
     var body = el('note-body').value.trim();
@@ -1456,12 +1334,10 @@ function bindEvents() {
     toast('Note added!', 'ok');
   });
 
-  // Focus
-  el('focus-enter').addEventListener('click', enterFocus);
+    el('focus-enter').addEventListener('click', enterFocus);
   el('focus-exit').addEventListener('click', exitFocus);
 
-  // FAB
-  el('fab-btn').addEventListener('click', function() {
+    el('fab-btn').addEventListener('click', function() {
     el('fab-btn').classList.toggle('open');
     el('fab-menu').classList.toggle('open');
   });
@@ -1477,16 +1353,14 @@ function bindEvents() {
     });
   });
 
-  // Close FAB menu on outside click
-  document.addEventListener('click', function(e) {
+    document.addEventListener('click', function(e) {
     if (!e.target.closest('#fab-wrap') && el('fab-menu').classList.contains('open')) {
       el('fab-btn').classList.remove('open');
       el('fab-menu').classList.remove('open');
     }
   });
 
-  // Command palette
-  el('cmd-trigger').addEventListener('click', openCmd);
+    el('cmd-trigger').addEventListener('click', openCmd);
 
   el('cmd-input').addEventListener('input', function() {
     runCommand(el('cmd-input').value);
@@ -1537,8 +1411,7 @@ function bindEvents() {
     if (e.target === el('cmd-overlay')) closeCmd();
   });
 
-  // Settings
-  el('settings-export').addEventListener('click', exportData);
+    el('settings-export').addEventListener('click', exportData);
 
   el('settings-import').addEventListener('change', function(e) {
     if (e.target.files[0]) importData(e.target.files[0]);
@@ -1569,10 +1442,8 @@ function bindEvents() {
     if (state.pomo.mode === 'long') setPomodoroMode('long');
   });
 
-  // Keyboard shortcuts
-  document.addEventListener('keydown', function(e) {
-    // Ctrl+K or Cmd+K for command palette
-    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+    document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
       e.preventDefault();
       if (el('cmd-overlay').classList.contains('active')) closeCmd();
       else openCmd();
@@ -1589,44 +1460,33 @@ function bindEvents() {
   });
 }
 
-// ========================================
-// Initialization
-// ========================================
 function init() {
   load();
 
-  // Set date
-  el('task-date').value = today();
+    el('task-date').value = today();
 
-  // Set calendar to current month
-  var now = new Date();
+    var now = new Date();
   state.calYear = now.getFullYear();
   state.calMonth = now.getMonth();
 
-  // Apply theme
-  setTheme(state.theme);
+    setTheme(state.theme);
 
-  // Settings inputs
-  el('set-focus').value = state.pomo.focusMin;
+    el('set-focus').value = state.pomo.focusMin;
   el('set-short').value = state.pomo.shortMin;
   el('set-long').value = state.pomo.longMin;
 
-  // Init pomodoro
-  setPomodoroMode('focus');
+    setPomodoroMode('focus');
   updatePomodoroStats();
 
-  // Render everything
-  renderTasks();
+    renderTasks();
   updateDashboard();
   renderTimeline();
   nextQuote();
   updateClock();
 
-  // Bind all events
-  bindEvents();
+    bindEvents();
 
-  // Start clock
-  setInterval(updateClock, 1000);
+    setInterval(updateClock, 1000);
   setInterval(nextQuote, 30000);
 }
 
