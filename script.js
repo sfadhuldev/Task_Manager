@@ -102,7 +102,9 @@ let weeklyChart = null;
 // ===========================
 const esc = s => { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; };
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
-const today = () => new Date().toISOString().split('T')[0];
+const fmtLocalDate = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const today = () => fmtLocalDate(new Date());
+const localDate = iso => iso ? fmtLocalDate(new Date(iso)) : '';
 const pW = p => ({critical:4,high:3,medium:2,low:1}[p]||0);
 const fmtDate = d => {
   if(!d) return '';
@@ -647,12 +649,12 @@ function updateAll() {
 // 18. STREAK
 // ===========================
 function checkStreak() {
-  const dates = S.tasks.filter(t=>t.completed&&t.completedAt).map(t=>t.completedAt.split('T')[0]);
+  const dates = S.tasks.filter(t=>t.completed&&t.completedAt).map(t=>localDate(t.completedAt));
   const unique = [...new Set(dates)].sort().reverse();
   let streak = 0;
   for(let i=0; i<unique.length; i++) {
     const d = new Date(); d.setDate(d.getDate()-i);
-    if(unique[i] === d.toISOString().split('T')[0]) streak++;
+    if(unique[i] === fmtLocalDate(d)) streak++;
     else break;
   }
   S.streak = streak;
@@ -669,7 +671,7 @@ function updateChart() {
   for(let i=6; i>=0; i--) {
     const d = new Date(); d.setDate(d.getDate()-i);
     labels.push(d.toLocaleDateString('en-US',{weekday:'short'}));
-    data.push(S.tasks.filter(t=>t.completedAt&&t.completedAt.startsWith(d.toISOString().split('T')[0])).length);
+    data.push(S.tasks.filter(t=>t.completedAt&&localDate(t.completedAt)===fmtLocalDate(d)).length);
   }
   const ctx = document.getElementById('weekly-chart');
   if(!ctx) return;
@@ -724,7 +726,7 @@ function renderCalHeatmap() {
   const taskCounts = {};
   S.tasks.filter(t=>t.dueDate).forEach(t => {
     const m = t.dueDate.slice(0,7);
-    if(m === now.toISOString().slice(0,7)) taskCounts[t.dueDate] = (taskCounts[t.dueDate]||0)+1;
+    if(m === fmtLocalDate(now).slice(0,7)) taskCounts[t.dueDate] = (taskCounts[t.dueDate]||0)+1;
   });
   let html = '';
   for(let d=1; d<=daysInMonth; d++) {
@@ -747,14 +749,15 @@ function renderHabits() {
   }
   habitList.innerHTML = S.habits.map(h => {
     const week = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    const weekDates = week.map((_,i) => {
+      const d = new Date(); d.setDate(d.getDate()-d.getDay()+i);
+      return fmtLocalDate(d);
+    });
     const weekDays = week.map((wd,i) => {
-      const ch = (h.days||[]).includes(today()) && i === new Date().getDay();
+      const ch = (h.days||[]).includes(weekDates[i]);
       return `<span class="${ch?'checked':''}" data-h="${h.id}" data-d="${i}">${wd[0]}</span>`;
     }).join('');
-    const weekCompletions = (h.days||[]).filter(d => {
-      const dt = new Date(d), n=new Date(), start=new Date(n); start.setDate(n.getDate()-n.getDay());
-      return dt >= start;
-    }).length;
+    const weekCompletions = (h.days||[]).filter(d => d >= weekDates[0]).length;
     return `<div class="habit-card">
       <button class="habit-del" data-id="${h.id}"><i class="fa-solid fa-xmark"></i></button>
       <h4>${esc(h.name)}</h4>
@@ -789,7 +792,7 @@ function renderHeatmap() {
   let html = '';
   for(let i=0; i<26; i++) {
     const d = new Date(start); d.setDate(d.getDate()+i);
-    const ds = d.toISOString().split('T')[0];
+    const ds = fmtLocalDate(d);
     const c = counts[ds]||0;
     const level = c===0?'':c===1?'l1':c===2?'l2':c===3?'l3':'l4';
     html += `<span class="${level}" title="${ds}: ${c} habits"></span>`;
@@ -1401,7 +1404,7 @@ function endTour() {
 function updateBriefing() {
   if(!briefTodayDone) return;
   const todayStr = today();
-  const doneToday = S.tasks.filter(t=>t.completedAt&&t.completedAt.startsWith(todayStr)).length;
+  const doneToday = S.tasks.filter(t=>t.completedAt&&localDate(t.completedAt)===todayStr).length;
   briefTodayDone.textContent = doneToday;
   briefFocus.textContent = S.pomo.today+'m';
   const focusScore = S.pomo.today > 0 ? Math.min(100, Math.round((S.pomo.today/120)*100)) : Math.round(S.tasks.filter(t=>t.completed).length/Math.max(1,S.tasks.length)*100);
