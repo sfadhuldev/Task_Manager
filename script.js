@@ -113,6 +113,15 @@ function isToday(dateStr) {
   return dateStr === today();
 }
 
+function debounce(fn, ms) {
+  var timer;
+  return function() {
+    var ctx = this, args = arguments;
+    clearTimeout(timer);
+    timer = setTimeout(function() { fn.apply(ctx, args); }, ms);
+  };
+}
+
 // ========================================
 // LocalStorage
 // ========================================
@@ -144,8 +153,11 @@ function save() {
 }
 
 function getWeekNumber(d) {
-  var oneJan = new Date(d.getFullYear(), 0, 1);
-  return Math.ceil(((d - oneJan) / 86400000 + oneJan.getDay() + 1) / 7);
+  var date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  var dayNum = date.getUTCDay() || 7;
+  date.setUTCDate(date.getUTCDate() + 4 - dayNum);
+  var yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+  return Math.ceil(((date - yearStart) / 86400000 + 1) / 7);
 }
 
 function load() {
@@ -526,13 +538,14 @@ function checkStreak() {
   var unique = dates.filter(function(v, i, a) { return a.indexOf(v) === i; }).sort().reverse();
 
   var streak = 0;
-  var d = new Date();
-  for (var i = 0; i < unique.length; i++) {
-    var checkDate = new Date(d);
-    checkDate.setDate(d.getDate() - i);
-    var dateStr = checkDate.getFullYear() + '-' + String(checkDate.getMonth() + 1).padStart(2, '0') + '-' + String(checkDate.getDate()).padStart(2, '0');
-    if (unique[i] === dateStr) {
+  var now = new Date();
+  var check = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  for (var i = 0; i <= unique.length; i++) {
+    var dateStr = check.getFullYear() + '-' + String(check.getMonth() + 1).padStart(2, '0') + '-' + String(check.getDate()).padStart(2, '0');
+    if (unique.indexOf(dateStr) > -1) {
       streak++;
+      check.setDate(check.getDate() - 1);
     } else {
       break;
     }
@@ -697,10 +710,14 @@ function renderHabits() {
   // Delete habit
   container.querySelectorAll('.habit-del').forEach(function(btn) {
     btn.addEventListener('click', function() {
-      state.habits = state.habits.filter(function(h) { return h.id !== btn.dataset.id; });
-      save();
-      renderHabits();
-      toast('Habit deleted', 'info');
+      var habit = state.habits.find(function(h) { return h.id === btn.dataset.id; });
+      var name = habit ? habit.name : 'this habit';
+      confirmAction('Delete habit "' + name + '"?', function() {
+        state.habits = state.habits.filter(function(h) { return h.id !== btn.dataset.id; });
+        save();
+        renderHabits();
+        toast('Habit deleted', 'info');
+      });
     });
   });
 }
@@ -739,6 +756,7 @@ function startPomodoro() {
 
   state.pomo.running = true;
   el('pomo-start').textContent = 'Running';
+  el('pomo-card').classList.add('running');
 
   state.pomo.interval = setInterval(function() {
     state.pomo.time--;
@@ -749,6 +767,7 @@ function startPomodoro() {
       state.pomo.interval = null;
       state.pomo.running = false;
       el('pomo-start').textContent = 'Start';
+      el('pomo-card').classList.remove('running');
 
       if (state.pomo.mode === 'focus') {
         state.pomo.sessions++;
@@ -756,10 +775,10 @@ function startPomodoro() {
         state.pomo.week += state.pomo.focusMin;
         updatePomodoroStats();
         save();
-        toast('Focus session complete! Take a break.', 'ok');
+        notifyPomodoro('Focus session complete!', 'Take a break.');
         logActivity('Pomodoro session completed');
       } else {
-        toast('Break over! Time to focus.', 'info');
+        notifyPomodoro('Break over!', 'Time to focus.');
       }
     }
   }, 1000);
@@ -771,6 +790,7 @@ function pausePomodoro() {
   state.pomo.interval = null;
   state.pomo.running = false;
   el('pomo-start').textContent = 'Resume';
+  el('pomo-card').classList.remove('running');
 }
 
 function resetPomodoro() {
@@ -780,6 +800,7 @@ function resetPomodoro() {
   }
   state.pomo.running = false;
   el('pomo-start').textContent = 'Start';
+  el('pomo-card').classList.remove('running');
   setPomodoroMode(state.pomo.mode);
 }
 
@@ -788,6 +809,29 @@ function updatePomodoroStats() {
   el('pomo-today').textContent = state.pomo.today + ' min';
   el('pomo-week').textContent = state.pomo.week + ' min';
   el('pomo-total').textContent = state.pomo.sessions;
+}
+
+function notifyPomodoro(title, body) {
+  toast(title + '! ' + body, 'ok');
+
+  // Flash page title
+  var origTitle = document.title;
+  var flashCount = 0;
+  var flashInterval = setInterval(function() {
+    document.title = flashCount % 2 === 0 ? '\u23F1 ' + title : origTitle;
+    flashCount++;
+    if (flashCount > 9) {
+      clearInterval(flashInterval);
+      document.title = origTitle;
+    }
+  }, 1000);
+
+  // Request browser notification if permitted
+  if ('Notification' in window && Notification.permission === 'granted') {
+    new Notification(title, { body: body });
+  } else if ('Notification' in window && Notification.permission !== 'denied') {
+    Notification.requestPermission();
+  }
 }
 
 // ========================================
@@ -809,16 +853,38 @@ function renderGoals() {
       '<button class="goal-del" data-id="' + g.id + '">&times;</button>' +
       '<h4>' + esc(g.name) + '</h4>' +
       '<div class="goal-bar"><div class="goal-bar-fill" style="width:' + pct + '%"></div></div>' +
-      '<div class="goal-meta"><span>' + pct + '% complete</span><span>' + dueText + '</span></div>' +
+      '<div class="goal-meta">' +
+        '<div class="goal-progress-btns">' +
+          '<button class="goal-prog-btn goal-prog-minus" data-id="' + g.id + '" data-dir="-1">&minus;</button>' +
+          '<span>' + pct + '%</span>' +
+          '<button class="goal-prog-btn goal-prog-plus" data-id="' + g.id + '" data-dir="1">+</button>' +
+        '</div>' +
+        '<span>' + dueText + '</span>' +
+      '</div>' +
     '</div>';
   }).join('');
 
   container.querySelectorAll('.goal-del').forEach(function(btn) {
     btn.addEventListener('click', function() {
-      state.goals = state.goals.filter(function(g) { return g.id !== btn.dataset.id; });
+      var goal = state.goals.find(function(g) { return g.id === btn.dataset.id; });
+      var name = goal ? goal.name : 'this goal';
+      confirmAction('Delete goal "' + name + '"?', function() {
+        state.goals = state.goals.filter(function(g) { return g.id !== btn.dataset.id; });
+        save();
+        renderGoals();
+        toast('Goal deleted', 'info');
+      });
+    });
+  });
+
+  container.querySelectorAll('.goal-prog-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var goal = state.goals.find(function(g) { return g.id === btn.dataset.id; });
+      if (!goal) return;
+      var dir = parseInt(btn.dataset.dir) || 0;
+      goal.progress = Math.max(0, Math.min(100, (goal.progress || 0) + dir * 10));
       save();
       renderGoals();
-      toast('Goal deleted', 'info');
     });
   });
 }
@@ -846,10 +912,14 @@ function renderNotes() {
 
   container.querySelectorAll('.note-del').forEach(function(btn) {
     btn.addEventListener('click', function() {
-      state.notes = state.notes.filter(function(n) { return n.id !== btn.dataset.id; });
-      save();
-      renderNotes();
-      toast('Note deleted', 'info');
+      var note = state.notes.find(function(n) { return n.id === btn.dataset.id; });
+      var name = note ? (note.title || 'Untitled') : 'this note';
+      confirmAction('Delete note "' + name + '"?', function() {
+        state.notes = state.notes.filter(function(n) { return n.id !== btn.dataset.id; });
+        save();
+        renderNotes();
+        toast('Note deleted', 'info');
+      });
     });
   });
 }
@@ -947,6 +1017,11 @@ function exportData() {
     completedCount: state.completedCount,
     streak: state.streak,
     pomoSessions: state.pomo.sessions,
+    pomoFocusMin: state.pomo.focusMin,
+    pomoShortMin: state.pomo.shortMin,
+    pomoLongMin: state.pomo.longMin,
+    activityLog: state.activityLog,
+    theme: state.theme,
     exportedAt: new Date().toISOString()
   };
   var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -972,6 +1047,15 @@ function importData(file) {
       if (Array.isArray(d.notes)) state.notes = d.notes;
       if (typeof d.completedCount === 'number') state.completedCount = d.completedCount;
       if (typeof d.streak === 'number') state.streak = d.streak;
+      if (typeof d.pomoFocusMin === 'number') state.pomo.focusMin = d.pomoFocusMin;
+      if (typeof d.pomoShortMin === 'number') state.pomo.shortMin = d.pomoShortMin;
+      if (typeof d.pomoLongMin === 'number') state.pomo.longMin = d.pomoLongMin;
+      if (Array.isArray(d.activityLog)) state.activityLog = d.activityLog;
+
+      // Update settings inputs
+      el('set-focus').value = state.pomo.focusMin;
+      el('set-short').value = state.pomo.shortMin;
+      el('set-long').value = state.pomo.longMin;
 
       save();
       renderTasks();
@@ -992,20 +1076,44 @@ function importData(file) {
 // ========================================
 // Command Palette
 // ========================================
+var cmdMatches = [];
+var cmdIdx = -1;
+
 function openCmd() {
   el('cmd-overlay').classList.add('active');
   el('cmd-input').value = '';
   el('cmd-results').innerHTML = '';
+  cmdMatches = [];
+  cmdIdx = -1;
   setTimeout(function() { el('cmd-input').focus(); }, 100);
 }
 
 function closeCmd() {
   el('cmd-overlay').classList.remove('active');
+  cmdMatches = [];
+  cmdIdx = -1;
+}
+
+function highlightCmdItem() {
+  var items = el('cmd-results').querySelectorAll('.cmd-item');
+  items.forEach(function(item, i) {
+    item.classList.toggle('cmd-active', i === cmdIdx);
+  });
+  if (cmdIdx >= 0 && items[cmdIdx]) {
+    items[cmdIdx].scrollIntoView({ block: 'nearest' });
+  }
+}
+
+function selectCmdItem() {
+  if (cmdIdx >= 0 && cmdMatches[cmdIdx]) {
+    closeCmd();
+    cmdMatches[cmdIdx].action();
+  }
 }
 
 function runCommand(val) {
   var v = val.toLowerCase().trim();
-  if (!v) { el('cmd-results').innerHTML = ''; return; }
+  if (!v) { el('cmd-results').innerHTML = ''; cmdMatches = []; cmdIdx = -1; return; }
 
   var commands = [
     { name: 'Go to Dashboard', action: function() { openView('dashboard'); } },
@@ -1027,20 +1135,22 @@ function runCommand(val) {
     { name: 'Reset All Data', action: function() { confirmAction('Reset ALL data?', function() { localStorage.removeItem(STORAGE_KEY); location.reload(); }); } }
   ];
 
-  var matches = commands.filter(function(cmd) {
+  cmdMatches = commands.filter(function(cmd) {
     return cmd.name.toLowerCase().includes(v);
   });
 
-  el('cmd-results').innerHTML = matches.map(function(cmd, i) {
-    return '<div class="cmd-item" data-idx="' + i + '">' + esc(cmd.name) + '</div>';
+  cmdIdx = cmdMatches.length > 0 ? 0 : -1;
+
+  el('cmd-results').innerHTML = cmdMatches.map(function(cmd, i) {
+    return '<div class="cmd-item' + (i === 0 ? ' cmd-active' : '') + '" data-idx="' + i + '">' + esc(cmd.name) + '</div>';
   }).join('');
 
   el('cmd-results').querySelectorAll('.cmd-item').forEach(function(item) {
     item.addEventListener('click', function() {
       var idx = parseInt(item.dataset.idx);
-      if (matches[idx]) {
+      if (cmdMatches[idx]) {
         closeCmd();
-        matches[idx].action();
+        cmdMatches[idx].action();
       }
     });
   });
@@ -1118,11 +1228,11 @@ function bindEvents() {
     }
   });
 
-  // Task search
-  el('task-search').addEventListener('input', function() {
+  // Task search (debounced)
+  el('task-search').addEventListener('input', debounce(function() {
     state.search = el('task-search').value;
     renderTasks();
-  });
+  }, 200));
 
   // Task sort
   el('task-sort').addEventListener('change', function() {
@@ -1383,17 +1493,43 @@ function bindEvents() {
   });
 
   el('cmd-input').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter' && el('cmd-input').value.trim()) {
-      var v = el('cmd-input').value.toLowerCase().trim();
-      if (v.startsWith('add ')) {
-        var text = v.slice(4).trim();
-        if (text) {
-          addTask(text, 'medium', 'Work', '', '');
-          closeCmd();
-          return;
-        }
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (cmdMatches.length > 0) {
+        cmdIdx = (cmdIdx + 1) % cmdMatches.length;
+        highlightCmdItem();
       }
-      runCommand(el('cmd-input').value);
+      return;
+    }
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (cmdMatches.length > 0) {
+        cmdIdx = (cmdIdx - 1 + cmdMatches.length) % cmdMatches.length;
+        highlightCmdItem();
+      }
+      return;
+    }
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (cmdIdx >= 0 && cmdMatches[cmdIdx]) {
+        selectCmdItem();
+      } else if (el('cmd-input').value.trim()) {
+        var v = el('cmd-input').value.toLowerCase().trim();
+        if (v.startsWith('add ')) {
+          var text = v.slice(4).trim();
+          if (text) {
+            addTask(text, 'medium', 'Work', '', '');
+            closeCmd();
+            return;
+          }
+        }
+        runCommand(el('cmd-input').value);
+      }
+      return;
+    }
+    if (e.key === 'Escape') {
+      closeCmd();
+      return;
     }
   });
 

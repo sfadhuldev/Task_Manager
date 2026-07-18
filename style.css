@@ -40,6 +40,15 @@
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
+::selection {
+  background: var(--primary);
+  color: #fff;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('./pe.jpg') fixed center/cover;
@@ -56,6 +65,29 @@ ul { list-style: none; }
 a { color: inherit; text-decoration: none; }
 button { font-family: inherit; cursor: pointer; }
 input, select, textarea { font-family: inherit; }
+
+/* Global scrollbar */
+*::-webkit-scrollbar { width: 6px; height: 6px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+*::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+[data-theme="light"] *::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); }
+[data-theme="light"] *::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.2); }
+
+/* Focus visible for accessibility */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+button:focus-visible,
+.input:focus-visible,
+.input-sm:focus-visible,
+.textarea:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
 
 /* ========================================
    LAYOUT
@@ -311,6 +343,20 @@ input, select, textarea { font-family: inherit; }
   border-radius: var(--radius-lg);
   padding: 18px 20px;
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.card:hover {
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+}
+
+.dash-grid .card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="light"] .dash-grid .card:hover {
+  border-color: rgba(0, 0, 0, 0.12);
 }
 
 .card-title {
@@ -483,6 +529,12 @@ input, select, textarea { font-family: inherit; }
 .view {
   display: none;
   padding: 20px 24px;
+  animation: viewFadeIn 0.3s ease;
+}
+
+@keyframes viewFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .view.active { display: block; }
@@ -522,6 +574,12 @@ input, select, textarea { font-family: inherit; }
   border-radius: var(--radius);
   padding: 14px;
   text-align: center;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(124, 58, 237, 0.3);
 }
 
 .stat-num {
@@ -1138,7 +1196,11 @@ input, select, textarea { font-family: inherit; }
   gap: 14px;
 }
 
-.pomo-card { text-align: center; padding: 28px 20px; }
+.pomo-card { text-align: center; padding: 28px 20px; transition: box-shadow 0.3s ease; }
+
+.pomo-card.running {
+  box-shadow: 0 0 30px var(--primary-glow), 0 2px 16px rgba(0, 0, 0, 0.1);
+}
 
 .pomo-modes {
   display: flex;
@@ -1205,7 +1267,10 @@ input, select, textarea { font-family: inherit; }
   transition: all var(--tr);
 }
 
-.goal-card:hover { border-color: rgba(255, 255, 255, 0.12); }
+.goal-card:hover {
+  border-color: rgba(124, 58, 237, 0.3);
+  transform: translateY(-1px);
+}
 
 .goal-card h4 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
 
@@ -1227,8 +1292,39 @@ input, select, textarea { font-family: inherit; }
 .goal-meta {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   font-size: 11px;
   color: var(--text2);
+}
+
+.goal-progress-btns {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.goal-prog-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text2);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--tr);
+  line-height: 1;
+  padding: 0;
+}
+
+.goal-prog-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-light);
 }
 
 .goal-del {
@@ -1269,7 +1365,11 @@ input, select, textarea { font-family: inherit; }
   transition: all var(--tr);
 }
 
-.note-card:hover { background: var(--bg3); }
+.note-card:hover {
+  background: var(--bg3);
+  transform: translateY(-1px);
+  border-color: rgba(124, 58, 237, 0.2);
+}
 
 .note-card h4 { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
 
@@ -1345,7 +1445,15 @@ input, select, textarea { font-family: inherit; }
   transition: all var(--tr);
 }
 
-.achieve-card:hover { border-color: rgba(255, 255, 255, 0.12); }
+.achieve-card.unlocked:hover {
+  border-color: var(--yellow);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.15);
+}
+
+.achieve-card.locked:hover {
+  opacity: 0.45;
+}
 
 .achieve-card .achieve-icon { font-size: 32px; margin-bottom: 6px; }
 
@@ -1532,6 +1640,12 @@ input, select, textarea { font-family: inherit; }
   color: var(--text);
 }
 
+.cmd-item.cmd-active {
+  background: var(--bg3);
+  border-color: var(--primary);
+  color: var(--text);
+}
+
 /* ========================================
    TOASTS
    ======================================== */
@@ -1612,6 +1726,19 @@ input, select, textarea { font-family: inherit; }
 .fab-btn:hover { transform: scale(1.1); }
 .fab-btn.open { transform: rotate(45deg); }
 
+@keyframes fabPulse {
+  0%, 100% { box-shadow: 0 4px 20px var(--primary-glow); }
+  50% { box-shadow: 0 4px 30px rgba(124, 58, 237, 0.5); }
+}
+
+.fab-btn:not(.open) {
+  animation: fabPulse 3s ease-in-out infinite;
+}
+
+.fab-btn.open {
+  animation: none;
+}
+
 .fab-menu {
   display: flex;
   flex-direction: column;
@@ -1661,6 +1788,7 @@ input, select, textarea { font-family: inherit; }
 @media (max-width: 768px) {
   .sidebar {
     transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .sidebar.open {
@@ -1689,6 +1817,9 @@ input, select, textarea { font-family: inherit; }
   .meta-row .input-sm { min-width: 0; }
 
   .modal { max-width: 100%; }
+
+  .cmd-bar { margin: 0 16px; }
+  .cmd-results { margin: 6px 16px 0; }
 }
 
 @media (max-width: 480px) {
