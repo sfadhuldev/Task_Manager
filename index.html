@@ -1,523 +1,401 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="SFadhul Workspace - Your all-in-one productivity system with tasks, habits, pomodoro, kanban, and analytics. All data stays on your device.">
-<meta name="theme-color" content="#0a0a1a">
-<title>SFadhul Workspace</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SFadhul Workspace</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<a class="skip-link" href="#main">Skip to content</a>
-
-<div class="welcome-overlay" id="welcome-overlay" role="dialog" aria-modal="true" aria-labelledby="welcome-title">
-  <div class="welcome-box glass">
-    <div class="welcome-icon"><span class="sw-logo lg">SW</span></div>
-    <h1 id="welcome-title">Welcome to <span>SFadhul Workspace</span></h1>
-    <p class="welcome-sub">The most advanced productivity system — built entirely in your browser.</p>
-    <div class="welcome-features">
-      <span><i class="fa-solid fa-list-check"></i> Smart Tasks</span>
-      <span><i class="fa-solid fa-clock"></i> Pomodoro</span>
-      <span><i class="fa-solid fa-check-double"></i> Habits</span>
-      <span><i class="fa-solid fa-chart-simple"></i> Analytics</span>
-      <span><i class="fa-solid fa-table-columns"></i> Kanban</span>
-      <span><i class="fa-solid fa-trophy"></i> Achievements</span>
-    </div>
-    <button class="btn-p glow" id="welcome-start" style="padding:12px 40px;font-size:16px"><i class="fa-solid fa-rocket"></i> Get Started</button>
-    <p class="welcome-local">All data stays on your device. No sign-up required.</p>
-  </div>
-</div>
-
-<div class="loader" id="loader">
-  <div class="loader-ring"></div>
-  <p>SFadhul <span>Workspace</span></p>
-</div>
-
-<canvas id="confetti-canvas" aria-hidden="true"></canvas>
-<canvas id="particle-canvas" aria-hidden="true"></canvas>
-
-<div class="cmd-overlay" id="cmd-overlay">
-  <div class="cmd-bar" id="cmd-bar">
-    <i class="fa-solid fa-magnifying-glass"></i>
-    <input type="text" id="cmd-input" placeholder="Quick action...  (type 'add', 'go to', 'theme', 'export', 'clear')">
-    <span class="cmd-hint"><kbd>esc</kbd> to close</span>
-  </div>
-  <div class="cmd-results" id="cmd-results"></div>
-</div>
-
 <div class="app" id="app">
-
   <aside class="sidebar" id="sidebar">
-    <div class="sidebar-head">
-      <div class="logo"><span class="sw-logo">SW</span> SFadhul Workspace</div>
-      <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar"><i class="fa-solid fa-bars"></i></button>
+    <div class="sidebar-header">
+      <div class="logo"><span class="logo-icon">SW</span> SFadhul Workspace</div>
+      <button class="sidebar-close" id="sidebar-close" type="button" aria-label="Close sidebar">&times;</button>
     </div>
     <nav class="nav" id="nav">
-      <button class="nav-item active" data-view="dashboard"><i class="fa-solid fa-chart-pie"></i><span>Dashboard</span></button>
-      <button class="nav-item" data-view="tasks"><i class="fa-solid fa-list-check"></i><span>Tasks</span><span class="nav-badge" id="nav-badge">0</span></button>
-      <button class="nav-item" data-view="calendar"><i class="fa-solid fa-calendar-days"></i><span>Calendar</span></button>
-      <button class="nav-item" data-view="kanban"><i class="fa-solid fa-table-columns"></i><span>Kanban</span></button>
-      <button class="nav-item" data-view="habits"><i class="fa-solid fa-check-double"></i><span>Habits</span></button>
-      <button class="nav-item" data-view="pomodoro"><i class="fa-solid fa-clock"></i><span>Pomodoro</span></button>
-      <button class="nav-item" data-view="goals"><i class="fa-solid fa-bullseye"></i><span>Goals</span></button>
-      <button class="nav-item" data-view="notes"><i class="fa-solid fa-note-sticky"></i><span>Notes</span></button>
-      <button class="nav-item" data-view="focus"><i class="fa-solid fa-eye"></i><span>Focus</span></button>
-      <button class="nav-item" data-view="achievements"><i class="fa-solid fa-trophy"></i><span>Achievements</span></button>
-      <button class="nav-item" data-view="settings"><i class="fa-solid fa-sliders"></i><span>Settings</span></button>
+      <button class="nav-btn active" type="button" data-view="dashboard">&#9673; Dashboard</button>
+      <button class="nav-btn" type="button" data-view="tasks">&#9776; Tasks <span class="badge" id="nav-badge">0</span></button>
+      <button class="nav-btn" type="button" data-view="calendar">&#128197; Calendar</button>
+      <button class="nav-btn" type="button" data-view="kanban">&#9638; Kanban</button>
+      <button class="nav-btn" type="button" data-view="habits">&#10003; Habits</button>
+      <button class="nav-btn" type="button" data-view="pomodoro">&#9201; Pomodoro</button>
+      <button class="nav-btn" type="button" data-view="goals">&#127919; Goals</button>
+      <button class="nav-btn" type="button" data-view="notes">&#128221; Notes</button>
+      <button class="nav-btn" type="button" data-view="focus">&#128065; Focus</button>
+      <button class="nav-btn" type="button" data-view="achievements">&#127942; Achievements</button>
+      <button class="nav-btn" type="button" data-view="settings">&#9881; Settings</button>
     </nav>
-    <div class="sidebar-foot">
-      <div class="mini-clock" id="mini-clock"></div>
-      <div class="mini-streak"><i class="fa-solid fa-fire"></i> Lv.<span id="mini-level">1</span> · <span id="mini-streak">0</span>d streak</div>
-      <div class="sidebar-brand">Powered by SFadhul Workspace</div>
+    <div class="sidebar-footer">
+      <div class="sidebar-clock" id="sidebar-clock"></div>
     </div>
   </aside>
 
   <main class="main" id="main">
-
     <header class="topbar" id="topbar">
-      <div class="topbar-left">
-        <button class="topbar-cmd" id="topbar-cmd"><i class="fa-solid fa-terminal"></i> Quick Command <span class="kbd">Ctrl+K</span></button>
-      </div>
+      <button class="menu-btn" id="menu-btn" type="button" aria-label="Open menu">&#9776;</button>
+      <button class="cmd-trigger" id="cmd-trigger" type="button">Quick Command <kbd>Ctrl+K</kbd></button>
       <div class="topbar-right">
         <span class="topbar-date" id="topbar-date"></span>
-        <span class="topbar-clock" id="topbar-clock"></span>
-        <div class="notif-wrap" id="notif-wrap">
-          <button class="topbar-btn" id="notif-btn" aria-label="Notifications"><i class="fa-solid fa-bell"></i><span class="notif-dot hidden" id="notif-dot"></span></button>
-          <div class="notif-dropdown hidden" id="notif-dropdown">
-            <div class="notif-head">Notifications</div>
-            <div id="notif-list"></div>
-          </div>
-        </div>
-        <button class="topbar-btn" id="theme-btn" aria-label="Toggle theme"><i class="fa-solid fa-moon"></i></button>
+        <button class="icon-btn" id="theme-toggle" type="button" aria-label="Toggle theme">&#9790;</button>
       </div>
     </header>
 
+    <!-- Dashboard -->
     <section class="view active" id="view-dashboard">
       <h1 class="view-title">SFadhul Workspace</h1>
-
-      <div class="dash-row-3">
-        <div class="profile-card glass card-pad">
-          <div class="profile-avatar" id="profile-avatar">U</div>
-          <h3 id="profile-name">User</h3>
-          <div class="profile-level">Level <span id="profile-lv">1</span></div>
-          <div class="profile-xp-bar"><div class="profile-xp-fill" id="profile-xp-fill" style="width:0%"></div></div>
-          <div class="profile-xp-text"><span id="profile-xp">0</span> / <span id="profile-xp-next">100</span> XP</div>
-          <div class="profile-stats"><span><i class="fa-solid fa-check-circle"></i> <span id="profile-total-done">0</span> done</span><span><i class="fa-solid fa-fire"></i> <span id="profile-total-streak">0</span>d streak</span></div>
-          <button class="glass-btn sm" id="profile-edit-btn"><i class="fa-solid fa-pen"></i> Edit Name</button>
-        </div>
-        <div class="glass card-pad" style="grid-column:span 2">
-          <div class="quote-card-inline">
-            <i class="fa-solid fa-quote-left" style="font-size:24px;color:var(--p);opacity:.3"></i>
-            <div>
-              <p id="quote-text" style="font-size:15px;font-weight:500;font-style:italic;line-height:1.5">The only way to do great work is to love what you do.</p>
-              <span id="quote-author" style="font-size:12px;color:var(--t2);margin-top:4px;display:block">— Steve Jobs</span>
-            </div>
-          </div>
-        </div>
+      <div class="stats-row">
+        <div class="stat-card glass"><div class="stat-num" id="st-total">0</div><div class="stat-label">Total</div></div>
+        <div class="stat-card glass"><div class="stat-num" id="st-active">0</div><div class="stat-label">Active</div></div>
+        <div class="stat-card glass"><div class="stat-num" id="st-done">0</div><div class="stat-label">Done</div></div>
+        <div class="stat-card glass"><div class="stat-num" id="st-overdue">0</div><div class="stat-label">Overdue</div></div>
+        <div class="stat-card glass"><div class="stat-num" id="st-today">0</div><div class="stat-label">Today</div></div>
+        <div class="stat-card glass"><div class="stat-num" id="st-score">0%</div><div class="stat-label">Score</div></div>
       </div>
-
-      <div class="glass card-pad" style="margin-bottom:24px">
-        <h3 class="card-title"><i class="fa-solid fa-sun"></i> Daily Briefing</h3>
-        <div class="brief-grid">
-          <div class="brief-item"><i class="fa-solid fa-list-check"></i><span class="brief-val" id="brief-today-done">0</span><span class="brief-lbl">Done Today</span></div>
-          <div class="brief-item"><i class="fa-solid fa-clock"></i><span class="brief-val" id="brief-focus">0m</span><span class="brief-lbl">Focus Today</span></div>
-          <div class="brief-item"><i class="fa-solid fa-brain"></i><span class="brief-val" id="brief-focus-score">0%</span><span class="brief-lbl">Focus Score</span></div>
+      <div class="dash-grid">
+        <div class="glass card">
+          <h3 class="card-title">Today's Tasks</h3>
+          <div id="dash-today-list" class="mini-list"><p class="muted">No tasks due today.</p></div>
         </div>
-      </div>
-      <div class="stats-grid" id="stats-grid">
-        <div class="stat-card glass" data-stat="total"><div class="stat-icon"><i class="fa-solid fa-layer-group"></i></div><div class="stat-body"><span class="stat-val" id="st-total">0</span><span class="stat-lbl">Total</span></div></div>
-        <div class="stat-card glass" data-stat="active"><div class="stat-icon"><i class="fa-solid fa-spinner"></i></div><div class="stat-body"><span class="stat-val" id="st-active">0</span><span class="stat-lbl">Active</span></div></div>
-        <div class="stat-card glass" data-stat="done"><div class="stat-icon"><i class="fa-solid fa-check-circle"></i></div><div class="stat-body"><span class="stat-val" id="st-done">0</span><span class="stat-lbl">Done</span></div></div>
-        <div class="stat-card glass" data-stat="overdue"><div class="stat-icon"><i class="fa-solid fa-exclamation-triangle"></i></div><div class="stat-body"><span class="stat-val" id="st-overdue">0</span><span class="stat-lbl">Overdue</span></div></div>
-        <div class="stat-card glass" data-stat="today"><div class="stat-icon"><i class="fa-solid fa-calendar-day"></i></div><div class="stat-body"><span class="stat-val" id="st-today">0</span><span class="stat-lbl">Today</span></div></div>
-        <div class="stat-card glass" data-stat="score"><div class="stat-icon"><i class="fa-solid fa-bolt"></i></div><div class="stat-body"><span class="stat-val" id="st-score">0%</span><span class="stat-lbl">Score</span></div></div>
-      </div>
-
-      <div class="dash-row-2">
-        <div class="glass card-pad">
-          <h3 class="card-title"><i class="fa-solid fa-chart-simple"></i> Completion</h3>
+        <div class="glass card">
+          <h3 class="card-title">Completion</h3>
           <div class="ring-wrap">
-            <svg class="ring" viewBox="0 0 120 120" aria-hidden="true">
+            <svg class="ring" viewBox="0 0 120 120">
               <circle class="ring-bg" cx="60" cy="60" r="50"/>
-              <circle class="ring-fg" id="ring-fg" cx="60" cy="60" r="50" style="stroke-dashoffset:314"/>
+              <circle class="ring-fg" id="ring-fg" cx="60" cy="60" r="50"/>
             </svg>
             <div class="ring-label"><span id="ring-pct">0%</span></div>
           </div>
-          <p class="ring-sub" id="ring-sub">0 / 0 tasks</p>
-        </div>
-        <div class="glass card-pad">
-          <h3 class="card-title"><i class="fa-solid fa-calendar-week"></i> Weekly Activity</h3>
-          <div class="chart-wrap"><canvas id="weekly-chart"></canvas></div>
+          <p class="muted center" id="ring-sub">0 / 0 tasks</p>
         </div>
       </div>
-
-      <div class="dash-row-2">
-        <div class="glass card-pad">
-          <h3 class="card-title"><i class="fa-solid fa-list"></i> Today's Tasks</h3>
-          <div id="dash-today-list" class="mini-list"><p class="text-muted">No tasks due today.</p></div>
+      <div class="dash-grid">
+        <div class="glass card">
+          <h3 class="card-title">Recent Activity</h3>
+          <div id="timeline" class="timeline"><p class="muted">No recent activity.</p></div>
         </div>
-      </div>
-      <div class="dash-row-2">
-        <div class="glass card-pad">
-          <h3 class="card-title"><i class="fa-solid fa-clock-rotate-left"></i> Activity Timeline</h3>
-          <div class="timeline" id="timeline"><p class="text-muted" style="font-size:12px;padding:8px 0">No recent activity.</p></div>
-        </div>
-        <div class="glass card-pad">
-          <h3 class="card-title"><i class="fa-solid fa-face-smile"></i> Mood & Energy</h3>
-          <p style="font-size:12px;color:var(--t2);margin-bottom:8px">How are you feeling today?</p>
-          <div class="mood-grid" id="mood-grid">
-            <button class="mood-btn" data-mood="amazing">😊</button>
-            <button class="mood-btn" data-mood="good">🙂</button>
-            <button class="mood-btn" data-mood="neutral">😐</button>
-            <button class="mood-btn" data-mood="bad">😢</button>
-            <button class="mood-btn" data-mood="tired">😴</button>
-          </div>
-          <label for="energy-slider" style="font-size:12px;color:var(--t2);margin:10px 0 4px;display:block">Energy Level</label>
-          <input type="range" class="energy-slider" id="energy-slider" min="0" max="10" value="5">
-          <div class="energy-labels"><span>Low</span><span id="energy-val">5</span><span>High</span></div>
+        <div class="glass card">
+          <h3 class="card-title">Quick Quote</h3>
+          <p class="quote-text" id="quote-text">The only way to do great work is to love what you do.</p>
+          <p class="quote-author" id="quote-author">&mdash; Steve Jobs</p>
         </div>
       </div>
     </section>
 
+    <!-- Tasks -->
     <section class="view" id="view-tasks">
-      <div class="view-head">
+      <div class="view-header">
         <h1 class="view-title">Tasks</h1>
         <div class="view-actions">
-          <button class="glass-btn sm" id="export-btn"><i class="fa-solid fa-download"></i> Export</button>
-          <label class="glass-btn sm"><i class="fa-solid fa-upload"></i> Import<input type="file" id="import-input" accept=".json" hidden></label>
-          <button class="glass-btn sm danger-hover" id="tasks-clear-all"><i class="fa-solid fa-trash-can"></i> Clear</button>
+          <button class="btn-sm" type="button" id="export-btn">Export</button>
+          <label class="btn-sm">Import<input type="file" id="import-input" accept=".json" hidden></label>
+          <button class="btn-sm danger" type="button" id="clear-all-btn">Clear All</button>
         </div>
       </div>
-
-      <form class="task-form glass card-pad" id="task-form">
-        <div class="form-main">
-          <div class="glass-input"><i class="fa-solid fa-pen"></i><input type="text" id="task-input" placeholder="What needs to be done?" required></div>
-          <button class="btn-p glow" id="add-btn"><i class="fa-solid fa-plus"></i> Add</button>
+      <form class="glass card task-form" id="task-form">
+        <div class="form-row">
+          <input type="text" id="task-input" class="input" placeholder="What needs to be done?" required>
+          <button class="btn-primary" type="submit">Add Task</button>
         </div>
-        <div class="form-meta">
-          <div class="glass-input sm"><i class="fa-solid fa-flag"></i><select id="task-priority"><option value="medium">Medium</option><option value="critical">Critical</option><option value="high">High</option><option value="low">Low</option></select></div>
-          <div class="glass-input sm"><i class="fa-solid fa-tag"></i><select id="task-category"><option value="Work">Work</option><option value="Personal">Personal</option><option value="Study">Study</option><option value="Health">Health</option><option value="Finance">Finance</option><option value="Creative">Creative</option><option value="Other">Other</option></select></div>
-          <div class="glass-input sm"><i class="fa-solid fa-hashtag"></i><input type="text" id="task-tags" placeholder="Tags"></div>
-          <div class="glass-input sm"><i class="fa-solid fa-calendar"></i><input type="date" id="task-date"></div>
-          <div class="glass-input sm"><i class="fa-solid fa-clock"></i><input type="time" id="task-time"></div>
-          <div class="glass-input sm"><i class="fa-solid fa-rotate"></i><select id="task-recurring"><option value="">One-time</option><option value="daily">Daily</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option></select></div>
+        <div class="form-row meta-row">
+          <select id="task-priority" class="input-sm">
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+            <option value="critical">Critical</option>
+            <option value="low">Low</option>
+          </select>
+          <select id="task-category" class="input-sm">
+            <option value="Work">Work</option>
+            <option value="Personal">Personal</option>
+            <option value="Study">Study</option>
+            <option value="Health">Health</option>
+            <option value="Other">Other</option>
+          </select>
+          <input type="date" id="task-date" class="input-sm">
+          <select id="task-recurring" class="input-sm">
+            <option value="">One-time</option>
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+          </select>
         </div>
       </form>
-
-      <div class="glass card-pad" style="margin-bottom:12px;padding:14px 18px">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><i class="fa-solid fa-layer-group" style="color:var(--p);font-size:13px"></i><span style="font-size:12px;font-weight:600">Quick Templates</span></div>
-        <div class="template-grid">
-          <div class="template-card" data-template="meeting"><i class="fa-solid fa-handshake"></i><span>Meeting</span></div>
-          <div class="template-card" data-template="email"><i class="fa-solid fa-envelope"></i><span>Email</span></div>
-          <div class="template-card" data-template="study"><i class="fa-solid fa-book"></i><span>Study</span></div>
-          <div class="template-card" data-template="workout"><i class="fa-solid fa-dumbbell"></i><span>Workout</span></div>
-          <div class="template-card" data-template="project"><i class="fa-solid fa-diagram-project"></i><span>Project</span></div>
+      <div class="glass card toolbar">
+        <div class="toolbar-row">
+          <input type="text" id="task-search" class="input" placeholder="Search tasks...">
+          <select id="task-sort" class="input-sm">
+            <option value="date-desc">Newest</option>
+            <option value="date-asc">Oldest</option>
+            <option value="priority-desc">Priority &#8595;</option>
+            <option value="priority-asc">Priority &#8593;</option>
+            <option value="name">Name</option>
+          </select>
+        </div>
+        <div class="filter-row" id="filter-row">
+          <button class="filter-btn active" type="button" data-filter="all">All</button>
+          <button class="filter-btn" type="button" data-filter="active">Active</button>
+          <button class="filter-btn" type="button" data-filter="done">Done</button>
+          <button class="filter-btn" type="button" data-filter="today">Today</button>
+          <button class="filter-btn" type="button" data-filter="overdue">Overdue</button>
         </div>
       </div>
-      <div class="task-toolbar glass card-pad">
-        <div class="toolbar-row">
-          <div class="glass-input" style="flex:1"><i class="fa-solid fa-search"></i><input type="text" id="task-search" placeholder="Search tasks..."><button class="search-clear hidden" id="search-clear"><i class="fa-solid fa-xmark"></i></button></div>
-          <div class="sort-group"><i class="fa-solid fa-arrow-down-wide-short"></i><select id="task-sort"><option value="date-desc">Newest</option><option value="date-asc">Oldest</option><option value="priority-desc">Priority ↓</option><option value="priority-asc">Priority ↑</option><option value="name">Name</option><option value="status">Status</option></select></div>
-        </div>
-        <div class="toolbar-row">
-          <div class="filter-group" id="filter-group">
-            <button class="fltr active" data-f="all">All</button>
-            <button class="fltr" data-f="active">Active</button>
-            <button class="fltr" data-f="done">Completed</button>
-            <button class="fltr" data-f="today">Today</button>
-            <button class="fltr" data-f="overdue">Overdue</button>
-            <button class="fltr" data-f="critical">Critical</button>
-            <button class="fltr" data-f="pinned">Pinned</button>
-            <button class="fltr" data-f="archived">Archived</button>
-          </div>
-          <div class="bulk-actions hidden" id="bulk-actions">
-            <button class="glass-btn sm" id="bulk-done"><i class="fa-solid fa-check"></i> Done</button>
-            <button class="glass-btn sm danger-hover" id="bulk-delete"><i class="fa-solid fa-trash"></i> Delete</button>
-            <span id="bulk-count">0 selected</span>
-          </div>
-        </div>
-      </div>
-
       <div class="task-list-wrap" id="task-list-wrap">
         <ul id="task-list"></ul>
         <div class="empty-state" id="empty-state">
-          <i class="fa-solid fa-clipboard-list"></i>
+          <div class="empty-icon">&#128203;</div>
           <h3 id="empty-title">No tasks</h3>
           <p id="empty-msg">Add your first task above.</p>
         </div>
       </div>
-
-      <div class="task-foot glass card-pad">
+      <div class="task-footer glass card">
         <span id="foot-count">0 tasks</span>
-        <button class="glass-btn sm hidden" id="clear-done-btn"><i class="fa-solid fa-check-double"></i> Clear Completed</button>
-        <div class="checkbox-bulk" id="checkbox-bulk"><input type="checkbox" id="bulk-toggle"><label for="bulk-toggle"> Select multiple</label></div>
+        <button class="btn-sm" type="button" id="clear-done-btn" style="display:none">Clear Completed</button>
       </div>
     </section>
 
+    <!-- Calendar -->
     <section class="view" id="view-calendar">
-      <div class="view-head">
-        <h1 class="view-title"><i class="fa-solid fa-calendar-days"></i> Calendar</h1>
+      <div class="view-header">
+        <h1 class="view-title">Calendar</h1>
         <div class="view-actions">
-          <button class="glass-btn sm" id="cal-prev" aria-label="Previous month"><i class="fa-solid fa-chevron-left"></i></button>
-          <span id="cal-label" style="min-width:160px;text-align:center;font-weight:600"></span>
-          <button class="glass-btn sm" id="cal-next" aria-label="Next month"><i class="fa-solid fa-chevron-right"></i></button>
-          <button class="glass-btn sm" id="cal-today">Today</button>
+          <button class="btn-sm" type="button" id="cal-prev">&lsaquo;</button>
+          <span id="cal-label" class="cal-label"></span>
+          <button class="btn-sm" type="button" id="cal-next">&rsaquo;</button>
+          <button class="btn-sm" type="button" id="cal-today">Today</button>
         </div>
       </div>
-      <div class="cal-grid glass card-pad" id="cal-grid">
+      <div class="glass card cal-grid">
         <div class="cal-head">
           <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
         </div>
         <div class="cal-body" id="cal-body"></div>
       </div>
-      <div class="glass card-pad" style="margin-top:16px">
-        <h3 class="card-title"><i class="fa-solid fa-fire"></i> Monthly Heatmap <span id="cal-heat-label" style="font-size:12px;font-weight:400"></span></h3>
-        <div class="cal-heatmap" id="cal-heatmap"></div>
-      </div>
     </section>
 
+    <!-- Kanban -->
     <section class="view" id="view-kanban">
-      <div class="view-head">
-        <h1 class="view-title"><i class="fa-solid fa-table-columns"></i> Kanban Board</h1>
-        <div class="view-actions">
-          <button class="glass-btn sm" id="kanban-add-btn"><i class="fa-solid fa-plus"></i> Quick Task</button>
-        </div>
+      <div class="view-header">
+        <h1 class="view-title">Kanban Board</h1>
       </div>
       <div class="kanban-board" id="kanban-board">
-        <div class="kanban-col" data-col="backlog">
-          <div class="kanban-head"><span>Backlog</span><span class="kanban-count" id="kanban-count-backlog">0</span></div>
-          <div class="kanban-list" id="kanban-list-backlog"></div>
+        <div class="kanban-col" data-col="not-started">
+          <div class="kanban-head"><span>To Do</span><span class="kanban-count" id="kc-not-started">0</span></div>
+          <div class="kanban-list" id="kl-not-started"></div>
         </div>
         <div class="kanban-col" data-col="in-progress">
-          <div class="kanban-head"><span>In Progress</span><span class="kanban-count" id="kanban-count-in-progress">0</span></div>
-          <div class="kanban-list" id="kanban-list-in-progress"></div>
+          <div class="kanban-head"><span>In Progress</span><span class="kanban-count" id="kc-in-progress">0</span></div>
+          <div class="kanban-list" id="kl-in-progress"></div>
         </div>
         <div class="kanban-col" data-col="review">
-          <div class="kanban-head"><span>Review</span><span class="kanban-count" id="kanban-count-review">0</span></div>
-          <div class="kanban-list" id="kanban-list-review"></div>
+          <div class="kanban-head"><span>Review</span><span class="kanban-count" id="kc-review">0</span></div>
+          <div class="kanban-list" id="kl-review"></div>
         </div>
         <div class="kanban-col" data-col="done">
-          <div class="kanban-head done"><span>Done</span><span class="kanban-count" id="kanban-count-done">0</span></div>
-          <div class="kanban-list" id="kanban-list-done"></div>
+          <div class="kanban-head done"><span>Done</span><span class="kanban-count" id="kc-done">0</span></div>
+          <div class="kanban-list" id="kl-done"></div>
         </div>
       </div>
     </section>
 
+    <!-- Habits -->
     <section class="view" id="view-habits">
-      <div class="view-head">
-        <h1 class="view-title"><i class="fa-solid fa-check-double"></i> Habits</h1>
-        <button class="glass-btn sm" id="habit-add-btn"><i class="fa-solid fa-plus"></i> New Habit</button>
+      <div class="view-header">
+        <h1 class="view-title">Habits</h1>
+        <button class="btn-primary" type="button" id="habit-add-btn">+ New Habit</button>
       </div>
-      <div class="glass card-pad">
-        <div class="habit-form hidden" id="habit-form">
-          <div class="form-main">
-            <div class="glass-input"><i class="fa-solid fa-dumbbell"></i><input type="text" id="habit-input" placeholder="Habit name..."></div>
-            <button class="btn-p glow" id="habit-save"><i class="fa-solid fa-floppy-disk"></i> Save</button>
-            <button class="glass-btn" id="habit-cancel">Cancel</button>
-          </div>
+      <div class="glass card habit-form-wrap" id="habit-form-wrap" style="display:none">
+        <div class="form-row">
+          <input type="text" id="habit-input" class="input" placeholder="Habit name...">
+          <button class="btn-primary" type="button" id="habit-save">Save</button>
+          <button class="btn-sm" type="button" id="habit-cancel">Cancel</button>
         </div>
       </div>
       <div id="habit-list" class="habit-grid"></div>
-      <div class="glass card-pad" style="margin-top:16px">
-        <h3 class="card-title"><i class="fa-solid fa-fire"></i> Habit Heatmap <span id="heat-label" style="font-size:12px;font-weight:400">last 26 days</span></h3>
-        <div class="heatmap" id="heatmap"></div>
-      </div>
     </section>
 
+    <!-- Pomodoro -->
     <section class="view" id="view-pomodoro">
-      <div class="view-head"><h1 class="view-title"><i class="fa-solid fa-clock"></i> Pomodoro</h1></div>
+      <h1 class="view-title">Pomodoro</h1>
       <div class="pomo-grid">
-        <div class="glass card-pad pomo-card">
+        <div class="glass card pomo-card">
           <div class="pomo-modes">
-            <button class="pomo-mode active" data-pm="focus">Focus</button>
-            <button class="pomo-mode" data-pm="short">Short</button>
-            <button class="pomo-mode" data-pm="long">Long</button>
+            <button class="pomo-mode active" type="button" data-mode="focus">Focus</button>
+            <button class="pomo-mode" type="button" data-mode="short">Short Break</button>
+            <button class="pomo-mode" type="button" data-mode="long">Long Break</button>
           </div>
-          <div class="pomo-ring-wrap">
-            <svg class="pomo-svg" viewBox="0 0 200 200" aria-hidden="true">
-              <circle class="pomo-bg" cx="100" cy="100" r="85"/>
-              <circle class="pomo-fg" id="pomo-fg" cx="100" cy="100" r="85"/>
-            </svg>
-            <div class="pomo-time" id="pomo-time">25:00</div>
+          <div class="pomo-display">
+            <span class="pomo-time" id="pomo-time">25:00</span>
           </div>
           <div class="pomo-btns">
-            <button class="btn-p glow" id="pomo-start"><i class="fa-solid fa-play"></i> Start</button>
-            <button class="glass-btn" id="pomo-pause" aria-label="Pause"><i class="fa-solid fa-pause"></i></button>
-            <button class="glass-btn" id="pomo-reset" aria-label="Reset timer"><i class="fa-solid fa-rotate"></i></button>
+            <button class="btn-primary" type="button" id="pomo-start">Start</button>
+            <button class="btn-sm" type="button" id="pomo-pause">Pause</button>
+            <button class="btn-sm" type="button" id="pomo-reset">Reset</button>
           </div>
-          <p class="pomo-sessions" id="pomo-sessions">Sessions: 0</p>
+          <p class="muted center" id="pomo-sessions">Sessions: 0</p>
         </div>
-        <div class="glass card-pad">
-          <h3 class="card-title"><i class="fa-solid fa-chart-bar"></i> Focus Stats</h3>
-          <p>Today's focus: <strong id="pomo-today">0 min</strong></p>
-          <p>Weekly focus: <strong id="pomo-week">0 min</strong></p>
-          <p>Total sessions: <strong id="pomo-total-sessions">0</strong></p>
+        <div class="glass card">
+          <h3 class="card-title">Focus Stats</h3>
+          <p class="stat-line">Today: <strong id="pomo-today">0 min</strong></p>
+          <p class="stat-line">This week: <strong id="pomo-week">0 min</strong></p>
+          <p class="stat-line">Total sessions: <strong id="pomo-total">0</strong></p>
         </div>
       </div>
     </section>
 
+    <!-- Goals -->
     <section class="view" id="view-goals">
-      <div class="view-head">
-        <h1 class="view-title"><i class="fa-solid fa-bullseye"></i> Goals</h1>
-        <button class="glass-btn sm" id="goal-add-btn"><i class="fa-solid fa-plus"></i> New Goal</button>
+      <div class="view-header">
+        <h1 class="view-title">Goals</h1>
+        <button class="btn-primary" type="button" id="goal-add-btn">+ New Goal</button>
       </div>
-      <div class="glass card-pad" style="margin-bottom:16px">
-        <div class="goal-form hidden" id="goal-form">
-          <div class="form-main">
-            <div class="glass-input"><input type="text" id="goal-input" placeholder="Goal name..."></div>
-            <div class="glass-input sm"><i class="fa-solid fa-calendar"></i><input type="date" id="goal-date"></div>
-            <button class="btn-p glow" id="goal-save"><i class="fa-solid fa-floppy-disk"></i> Save</button>
-            <button class="glass-btn" id="goal-cancel">Cancel</button>
-          </div>
+      <div class="glass card goal-form-wrap" id="goal-form-wrap" style="display:none">
+        <div class="form-row">
+          <input type="text" id="goal-input" class="input" placeholder="Goal name...">
+          <input type="number" id="goal-progress" class="input-sm" min="0" max="100" value="0" placeholder="0-100">
+          <input type="date" id="goal-date" class="input-sm">
+          <button class="btn-primary" type="button" id="goal-save">Save</button>
+          <button class="btn-sm" type="button" id="goal-cancel">Cancel</button>
         </div>
       </div>
       <div id="goal-list" class="goal-grid"></div>
     </section>
 
+    <!-- Notes -->
     <section class="view" id="view-notes">
-      <div class="view-head"><h1 class="view-title"><i class="fa-solid fa-note-sticky"></i> Notes</h1></div>
-      <div class="notes-grid">
-        <div class="glass card-pad">
+      <h1 class="view-title">Notes</h1>
+      <div class="notes-layout">
+        <div class="glass card">
           <form id="note-form">
-            <div class="glass-input" style="margin-bottom:8px"><i class="fa-solid fa-heading"></i><input type="text" id="note-title" placeholder="Title"></div>
-            <textarea id="note-body" placeholder="Write your note..." rows="6" style="width:100%;padding:10px;background:var(--s2);border:1px solid var(--b);border-radius:8px;color:var(--t1);font-family:inherit;font-size:14px;resize:vertical;outline:none"></textarea>
-            <button class="btn-p glow" style="margin-top:8px;width:100%"><i class="fa-solid fa-plus"></i> Add Note</button>
+            <input type="text" id="note-title" class="input" placeholder="Title" style="margin-bottom:8px">
+            <textarea id="note-body" class="textarea" placeholder="Write your note..." rows="5"></textarea>
+            <button class="btn-primary note-submit" type="submit">Add Note</button>
           </form>
         </div>
         <div id="notes-list" class="notes-list"></div>
       </div>
     </section>
 
+    <!-- Focus -->
     <section class="view" id="view-focus">
-      <div class="view-head"><h1 class="view-title"><i class="fa-solid fa-eye"></i> Focus Mode</h1></div>
-      <div class="glass card-pad focus-card" style="text-align:center;padding:60px 40px">
-        <i class="fa-solid fa-eye" style="font-size:64px;color:var(--p);margin-bottom:16px;opacity:.6"></i>
-        <h2 style="font-size:24px;margin-bottom:8px">Minimal Distraction Zone</h2>
-        <p style="color:var(--t2);margin-bottom:24px">Focus on what matters. This mode hides all navigation.</p>
-        <button class="btn-p glow" id="focus-enter"><i class="fa-solid fa-play"></i> Enter Focus Mode</button>
-        <div class="focus-active hidden" id="focus-active">
-          <div style="font-size:48px;font-weight:800;margin-bottom:16px" id="focus-task-count">0 tasks remaining</div>
-          <ul id="focus-list" style="list-style:none;max-width:400px;margin:0 auto"></ul>
-          <button class="glass-btn" id="focus-exit" style="margin-top:24px"><i class="fa-solid fa-xmark"></i> Exit Focus</button>
+      <h1 class="view-title">Focus Mode</h1>
+      <div class="glass card focus-card">
+        <div class="focus-icon">&#128065;</div>
+        <h2>Minimal Distraction Zone</h2>
+        <p class="muted">Focus on what matters. Hide distractions and work through your active tasks.</p>
+        <button class="btn-primary" type="button" id="focus-enter">Enter Focus Mode</button>
+        <div id="focus-active" style="display:none">
+          <p class="focus-count" id="focus-count">0 tasks remaining</p>
+          <ul id="focus-list" class="focus-list"></ul>
+          <button class="btn-sm" type="button" id="focus-exit" style="margin-top:16px">Exit Focus</button>
         </div>
       </div>
-      <div class="glass card-pad" style="margin-top:16px;text-align:center">
-        <h3 class="card-title"><i class="fa-solid fa-headphones"></i> Focus Music</h3>
-        <p style="color:var(--t2);font-size:13px;margin-bottom:12px">Ambient white noise to boost concentration</p>
-        <button class="glass-btn" id="focus-music-btn"><i class="fa-solid fa-play"></i> Play</button>
-      </div>
     </section>
 
+    <!-- Achievements -->
     <section class="view" id="view-achievements">
-      <div class="view-head"><h1 class="view-title"><i class="fa-solid fa-trophy"></i> Achievements</h1></div>
-      <div class="achieve-grid" id="achieve-grid"></div>
+      <h1 class="view-title">Achievements</h1>
+      <div id="achieve-grid" class="achieve-grid"></div>
     </section>
 
+    <!-- Settings -->
     <section class="view" id="view-settings">
-      <div class="view-head"><h1 class="view-title"><i class="fa-solid fa-sliders"></i> Settings</h1></div>
+      <h1 class="view-title">Settings</h1>
       <div class="settings-wrap">
-        <div class="glass card-pad">
-          <h3 class="card-title"><i class="fa-solid fa-palette"></i> Theme</h3>
+        <div class="glass card">
+          <h3 class="card-title">Theme</h3>
           <div class="theme-grid" id="theme-grid">
-            <button class="theme-card active" data-theme="dark"><div class="theme-swatch" style="background:linear-gradient(90deg,#7c3aed,#06b6d4)"></div>Dark</button>
-            <button class="theme-card" data-theme="light"><div class="theme-swatch" style="background:linear-gradient(90deg,#7c3aed,#06b6d4)"></div>Light</button>
-            <button class="theme-card" data-theme="cyberpunk"><div class="theme-swatch" style="background:linear-gradient(90deg,#ff0066,#00d4ff)"></div>Cyberpunk</button>
-            <button class="theme-card" data-theme="midnight"><div class="theme-swatch" style="background:linear-gradient(90deg,#f0c040,#40b0d0)"></div>Midnight</button>
-            <button class="theme-card" data-theme="ocean"><div class="theme-swatch" style="background:linear-gradient(90deg,#0891b2,#22d3ee)"></div>Ocean</button>
-            <button class="theme-card" data-theme="forest"><div class="theme-swatch" style="background:linear-gradient(90deg,#065f46,#14b8a6)"></div>Forest</button>
-            <button class="theme-card" data-theme="glass-neon"><div class="theme-swatch" style="background:linear-gradient(90deg,#a855f7,#06b6d4)"></div>Glass Neon</button>
+            <button class="theme-card active" type="button" data-theme="dark">Dark</button>
+            <button class="theme-card" type="button" data-theme="light">Light</button>
           </div>
         </div>
-        <div class="glass card-pad">
-          <h3 class="card-title"><i class="fa-solid fa-clock"></i> Pomodoro</h3>
-          <div class="set-row"><span>Focus (min)</span><input type="number" id="set-focus" value="25" class="set-input"></div>
-          <div class="set-row"><span>Short break</span><input type="number" id="set-short" value="5" class="set-input"></div>
-          <div class="set-row"><span>Long break</span><input type="number" id="set-long" value="15" class="set-input"></div>
+        <div class="glass card">
+          <h3 class="card-title">Pomodoro Timer</h3>
+          <div class="set-row"><span>Focus (min)</span><input type="number" id="set-focus" value="25" class="set-input" min="1"></div>
+          <div class="set-row"><span>Short break (min)</span><input type="number" id="set-short" value="5" class="set-input" min="1"></div>
+          <div class="set-row"><span>Long break (min)</span><input type="number" id="set-long" value="15" class="set-input" min="1"></div>
         </div>
-        <div class="glass card-pad">
-          <h3 class="card-title"><i class="fa-solid fa-database"></i> Data</h3>
-          <div class="set-row"><span>Export all data</span><button class="glass-btn sm" id="settings-export"><i class="fa-solid fa-download"></i> Export</button></div>
-          <div class="set-row"><span>Import data</span><label class="glass-btn sm"><i class="fa-solid fa-upload"></i> Import<input type="file" id="settings-import" accept=".json" hidden></label></div>
-          <div class="set-row"><span>Print report</span><button class="glass-btn sm" id="settings-print"><i class="fa-solid fa-print"></i> Print</button></div>
-          <div class="set-row"><span>Reset all data</span><button class="glass-btn sm danger-hover" id="settings-reset"><i class="fa-solid fa-trash-can"></i> Reset</button></div>
+        <div class="glass card">
+          <h3 class="card-title">Data</h3>
+          <div class="set-row"><span>Export data</span><button class="btn-sm" type="button" id="settings-export">Export</button></div>
+          <div class="set-row"><span>Import data</span><label class="btn-sm">Import<input type="file" id="settings-import" accept=".json" hidden></label></div>
+          <div class="set-row"><span>Reset all data</span><button class="btn-sm danger" type="button" id="settings-reset">Reset</button></div>
         </div>
-        <div class="glass card-pad">
-          <h3 class="card-title"><i class="fa-solid fa-circle-info"></i> About</h3>
-          <p style="color:var(--t2);font-size:14px;line-height:1.7">SFadhul Workspace<br>Built with vanilla HTML/CSS/JS<br>All data stored in LocalStorage<br>Font Awesome & Chart.js</p>
-          <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--b);font-size:11px;color:var(--tm);text-align:center">Powered by SFadhul Workspace</div>
+        <div class="glass card">
+          <h3 class="card-title">About</h3>
+          <p class="muted">SFadhul Workspace<br>Built with vanilla HTML, CSS, and JavaScript.<br>All data stored in your browser's LocalStorage.</p>
         </div>
       </div>
     </section>
-
   </main>
 </div>
 
-<div class="fab-wrap" id="fab-wrap">
-  <div class="fab-menu" id="fab-menu">
-    <button class="fab-item" data-fab="task"><i class="fa-solid fa-plus"></i> Add Task</button>
-    <button class="fab-item" data-fab="note"><i class="fa-solid fa-note-sticky"></i> Add Note</button>
-    <button class="fab-item" data-fab="pomo"><i class="fa-solid fa-clock"></i> Start Pomodoro</button>
-    <button class="fab-item" data-fab="cmd"><i class="fa-solid fa-terminal"></i> Command Palette</button>
-  </div>
-  <button class="fab-btn" id="fab-btn" aria-label="Quick actions"><i class="fa-solid fa-plus"></i></button>
-</div>
-
-<button class="ai-toggle" id="ai-toggle" aria-label="AI Assistant"><i class="fa-solid fa-robot"></i></button>
-<div class="ai-panel glass card-pad" id="ai-panel">
-  <div class="ai-head"><i class="fa-solid fa-sparkles"></i> AI Assistant<div class="ai-close" id="ai-close" aria-label="Close AI panel"><i class="fa-solid fa-xmark"></i></div></div>
-  <div class="ai-msgs" id="ai-msgs">
-    <div class="ai-msg bot">Hello! I'm your productivity assistant. Ask me anything about your workspace!</div>
-  </div>
-  <div class="ai-input-wrap">
-    <input class="ai-input" id="ai-input" placeholder="Ask AI..." autocomplete="off">
-    <button class="ai-send" id="ai-send" aria-label="Send message"><i class="fa-solid fa-paper-plane"></i></button>
-  </div>
-</div>
-
-<div class="tour-overlay" id="tour-overlay">
-  <div class="tour-tip" id="tour-tip">
-    <h3><i class="fa-solid fa-compass"></i> <span id="tour-title">Welcome!</span></h3>
-    <p id="tour-desc">Let's take a quick tour of your workspace.</p>
-    <div class="tour-actions">
-      <button class="tour-skip" id="tour-skip">Skip</button>
-      <button class="tour-next" id="tour-next">Next</button>
-    </div>
-  </div>
-</div>
-
+<!-- Edit Task Modal -->
 <div class="modal-overlay" id="modal-edit">
-  <div class="modal glass card-pad">
-    <div class="modal-head"><h2><i class="fa-solid fa-pen-to-square"></i> Edit Task</h2><button class="modal-close" data-modal="modal-edit" aria-label="Close edit task dialog"><i class="fa-solid fa-xmark"></i></button></div>
+  <div class="modal glass card">
+    <div class="modal-head">
+      <h2>Edit Task</h2>
+      <button class="modal-close" type="button" id="modal-edit-close">&times;</button>
+    </div>
     <form id="edit-form">
-      <div class="form-group"><label>Task</label><div class="glass-input"><input type="text" id="edit-text" required></div></div>
-      <div class="form-row-2">
-        <div class="form-group"><label>Priority</label><div class="glass-input sm"><i class="fa-solid fa-flag"></i><select id="edit-priority"><option value="critical">Critical</option><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select></div></div>
-        <div class="form-group"><label>Category</label><div class="glass-input sm"><i class="fa-solid fa-tag"></i><select id="edit-category"><option value="Work">Work</option><option value="Personal">Personal</option><option value="Study">Study</option><option value="Health">Health</option><option value="Finance">Finance</option><option value="Creative">Creative</option><option value="Other">Other</option></select></div></div>
+      <label class="form-label" for="edit-text">Task</label>
+      <input type="text" id="edit-text" class="input" required>
+      <div class="form-row">
+        <div><label class="form-label" for="edit-priority">Priority</label>
+          <select id="edit-priority" class="input-sm"><option value="medium">Medium</option><option value="high">High</option><option value="critical">Critical</option><option value="low">Low</option></select></div>
+        <div><label class="form-label" for="edit-category">Category</label>
+          <select id="edit-category" class="input-sm"><option value="Work">Work</option><option value="Personal">Personal</option><option value="Study">Study</option><option value="Health">Health</option><option value="Other">Other</option></select></div>
       </div>
-      <div class="form-row-2">
-        <div class="form-group"><label>Date</label><div class="glass-input sm"><i class="fa-solid fa-calendar"></i><input type="date" id="edit-date"></div></div>
-        <div class="form-group"><label>Time</label><div class="glass-input sm"><i class="fa-solid fa-clock"></i><input type="time" id="edit-time"></div></div>
+      <div class="form-row">
+        <div><label class="form-label" for="edit-date">Due Date</label><input type="date" id="edit-date" class="input-sm"></div>
+        <div><label class="form-label" for="edit-status">Status</label>
+          <select id="edit-status" class="input-sm"><option value="not-started">To Do</option><option value="in-progress">In Progress</option><option value="review">Review</option><option value="done">Done</option></select></div>
       </div>
-      <div class="form-group"><label>Tags (comma separated)</label><div class="glass-input"><i class="fa-solid fa-hashtag"></i><input type="text" id="edit-tags"></div></div>
-      <div class="form-group"><label>Recurring</label><div class="glass-input sm"><i class="fa-solid fa-rotate"></i><select id="edit-recurring"><option value="">None</option><option value="daily">Daily</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option></select></div></div>
-      <div class="form-group"><label>Status</label><div class="glass-input sm"><i class="fa-solid fa-signal"></i><select id="edit-status"><option value="not-started">Not Started</option><option value="in-progress">In Progress</option><option value="review">Review</option><option value="done">Done</option></select></div></div>
-      <div class="modal-actions"><button type="button" class="glass-btn modal-close" data-modal="modal-edit">Cancel</button><button class="btn-p"><i class="fa-solid fa-floppy-disk"></i> Save</button></div>
+      <label class="form-label" for="edit-recurring">Recurring</label>
+      <select id="edit-recurring" class="input-sm"><option value="">None</option><option value="daily">Daily</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option></select>
+      <div class="modal-actions">
+        <button type="button" class="btn-sm" id="edit-cancel">Cancel</button>
+        <button class="btn-primary" type="submit">Save</button>
+      </div>
     </form>
   </div>
 </div>
 
+<!-- Confirm Modal -->
 <div class="modal-overlay" id="modal-confirm">
-  <div class="modal glass card-pad modal-sm">
-    <div class="modal-head"><h2><i class="fa-solid fa-triangle-exclamation" style="color:var(--dan)"></i> Confirm</h2><button class="modal-close" data-modal="modal-confirm" aria-label="Close confirm dialog"><i class="fa-solid fa-xmark"></i></button></div>
-    <div class="modal-body"><p id="confirm-text">Are you sure?</p><div class="modal-actions"><button class="glass-btn modal-close" data-modal="modal-confirm">Cancel</button><button class="btn-p danger" id="confirm-yes">Confirm</button></div></div>
+  <div class="modal glass card modal-sm">
+    <div class="modal-head">
+      <h2>Confirm</h2>
+      <button class="modal-close" type="button" id="modal-confirm-close">&times;</button>
+    </div>
+    <p class="confirm-text" id="confirm-text">Are you sure?</p>
+    <div class="modal-actions">
+      <button class="btn-sm" type="button" id="confirm-cancel">Cancel</button>
+      <button class="btn-primary danger" type="button" id="confirm-yes">Confirm</button>
+    </div>
   </div>
 </div>
 
-<div class="toast-box" id="toast-box"></div>
+<!-- Command Palette -->
+<div class="cmd-overlay" id="cmd-overlay">
+  <div class="cmd-bar glass">
+    <input type="text" id="cmd-input" placeholder="Type a command..." autocomplete="off">
+  </div>
+  <div class="cmd-results" id="cmd-results"></div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- FAB -->
+<div class="fab-wrap" id="fab-wrap">
+  <div class="fab-menu" id="fab-menu">
+    <button class="fab-item" type="button" data-fab="task">+ Add Task</button>
+    <button class="fab-item" type="button" data-fab="note">+ Add Note</button>
+    <button class="fab-item" type="button" data-fab="pomo">Start Pomodoro</button>
+  </div>
+  <button class="fab-btn" id="fab-btn" type="button" aria-label="Quick actions">+</button>
+</div>
 
 <script src="script.js"></script>
 </body>
