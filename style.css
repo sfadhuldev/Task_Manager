@@ -486,7 +486,7 @@ svg defs{position:absolute;width:0;height:0;overflow:hidden}
 
 /* PARTICLES */
 #particle-canvas{position:fixed;inset:0;pointer-events:none;z-index:0}
-.app{z-index:1;position:relative}
+/* .app stacking context removed — sidebar z-index must be in root context */
 
 /* FAB */
 .fab-wrap{position:fixed;bottom:28px;right:28px;z-index:150;display:flex;flex-direction:column;align-items:flex-end;gap:8px}
